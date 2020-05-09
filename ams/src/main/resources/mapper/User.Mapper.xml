@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ekgc.ams.dao.UserDao">
+	<select id="findListByQuery" parameterType="User" resultMap="userMap">
+		select
+			su.id,
+			su.username,
+			su.cellphone,
+			su.password,
+			su.role_id,
+			sr.name,
+			case su.gender when '1' then '男' else '女' end as gender,
+			su.id_card,
+			su.email,
+			su.avatar,
+			su.status,
+			su.create_user,
+			su.create_time,
+			su.update_user,
+			su.update_time
+		from
+			sys_user su join sys_role sr on su.role_id=sr.id
+		<where>
+			<trim suffixOverrides="and">
+				<if test="id != null">su.id=#{id} and </if>
+				<if test="email != null">su.email=#{email} and </if>
+				<if test="username != null">su.username like CONCAT('%', #{username}, '%') and </if>
+				<if test="cellphone != null">su.cellphone=#{cellphone} and </if>
+				<if test="password != null">su.password=#{password} and </if>
+				<if test="role != null and role.id != null">su.role_id=#{role.id} and </if>
+				<if test="status != null">status=#{status} and </if>
+			</trim>
+		</where>
+	</select>
+
+	<insert id="saveUserList" parameterType="java.util.List">
+		insert into sys_user(
+			username,
+			cellphone,
+			password,
+			role_id,
+			gender,
+			id_card,
+			email,
+			status
+		) values
+		<foreach collection="list" item="item" index= "index" separator =",">
+			(
+				#{item.username},
+				#{item.cellphone},
+				#{item.password},
+				#{item.role.id},
+				#{item.gender},
+				#{item.idCard},
+				#{item.email},
+				#{item.status}
+			)
+		</foreach>
+	</insert>
+
+	<insert id="save" parameterType="User">
+		insert into sys_user(
+			<trim suffixOverrides=",">
+				<if test="username != null">username, </if>
+				<if test="cellphone != null">cellphone, </if>
+				<if test="password != null">password, </if>
+				<if test="role != null and role.id != null">role_id, </if>
+				<if test="gender != null">gender, </if>
+				<if test="idCard != null">id_card, </if>
+				<if test="email != null">email, </if>
+				<if test="avatar != null">avatar, </if>
+				<if test="status != null">status, </if>
+				<if test="createUser != null">create_user, </if>
+			</trim>
+		) values (
+		<trim suffixOverrides=",">
+			<if test="username != null">#{username}, </if>
+			<if test="cellphone != null">#{cellphone}, </if>
+			<if test="password != null">#{password}, </if>
+			<if test="role != null and role.id != null">#{role.id}, </if>
+			<if test="gender != null">#{gender}, </if>
+			<if test="idCard != null">#{idCard}, </if>
+			<if test="email != null">#{email}, </if>
+			<if test="avatar != null">#{avatar}, </if>
+			<if test="status != null">#{status}, </if>
+			<if test="createUser != null">#{createUser}, </if>
+		</trim>
+		)
+	</insert>
+
+	<update id="update" parameterType="User">
+		update
+			sys_user
+		<set>
+			<trim suffixOverrides=",">
+				<if test="username != null">username=#{username}, </if>
+				<if test="cellphone != null">cellphone=#{cellphone}, </if>
+				<if test="password != null">password=#{password}, </if>
+				<if test="role != null and role.id != null">role_id=#{role.id}, </if>
+				<if test="gender != null">gender=#{gender}, </if>
+				<if test="idCard != null">id_card=#{idCard}, </if>
+				<if test="email != null">email=#{email}, </if>
+				<if test="avatar != null">avatar=#{avatar}, </if>
+				<if test="status != null">status=#{status}, </if>
+				<if test="updateUser != null">update_user=#{updateUser}, </if>
+			</trim>
+		</set>
+		<where>
+			<trim suffixOverrides="and">
+				<if test="id != null">id=#{id} and </if>
+			</trim>
+		</where>
+	</update>
+
+	<resultMap id="userMap" type="User">
+		<id property="id" javaType="java.lang.Long" column="id"/>
+		<result property="username" javaType="java.lang.String" column="username"/>
+		<result property="cellphone" javaType="java.lang.String" column="cellphone"/>
+		<result property="password" javaType="java.lang.String" column="password"/>
+		<result property="gender" javaType="java.lang.String" column="gender"/>
+		<result property="idCard" javaType="java.lang.String" column="id_card"/>
+		<result property="email" javaType="java.lang.String" column="email"/>
+		<result property="avatar" javaType="java.lang.String" column="avatar"/>
+		<result property="status" javaType="java.lang.Integer" column="status"/>
+		<result property="createTime" javaType="java.util.Date" column="create_time"/>
+		<result property="updateTime" javaType="java.util.Date" column="update_time"/>
+		<association property="role" javaType="Role">
+			<id property="id" javaType="java.lang.Long" column="id"/>
+			<result property="name" javaType="java.lang.String" column="name"/>
+		</association>
+		<association property="createUser" javaType="User">
+			<id property="id" javaType="java.lang.Long" column="create_user"/>
+		</association>
+		<association property="updateUser" javaType="User">
+			<id property="id" javaType="java.lang.Long" column="update_user"/>
+		</association>
+	</resultMap>
+</mapper>

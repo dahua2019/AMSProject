@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<title>车辆管理系统</title>
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/AdminLTE.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/skins/_all-skins.min.css">
+		<script type="application/javascript" src="/js/jquery-3.4.1.min.js"></script>
+		<script type="application/javascript" src="/js/bootstrap.min.js"></script>
+		<script type="application/javascript" src="/js/adminlte.min.js"></script>
+		<script type="application/javascript">
+			// 加载中间 iframe
+			function openFrame(url, headTitle, firstTitle, firstIcon) {
+				// 设置标题
+				$("#frameHead").html(headTitle);
+				// 导航
+				var nav = "<li><a href='#'><i class='" + firstIcon + "'></i> " + firstTitle + "</a></li><li class='active'>" + headTitle + "</li>"
+				$("#frameNav").html(nav);
+				// iframe
+				// 通过 JavaScript 获得此时组件的高度
+				var height = $("#frameContent").parent().height() - $("#contentHead").height() - 50;
+				var iframe = "<iframe src='" + url + "' style='width: 100%; height: " + height + "px; border: 0px;' scrolling='true'></iframe>";
+				$("#frameContent").html(iframe);
+			}
+
+			// 打开模态框
+			function openModal(title, url, width, height) {
+				// 修改显示标题
+				$("#modalTitle").html(title);
+				var iframe = "<iframe src='" + url + "' style='width: " + width + "px; height: " + height + "px; border: 0px;' scrolling='true'></iframe>";
+				// 进行主题显示
+				$("#modalBody").html(iframe)
+				// 打开模态框
+				$("#myModal").modal({
+					keyboard: false
+				});
+			}
+
+            //关闭模态框
+            function closeModal() {
+                $("#myModal").modal("hide");
+            }
+		</script>
+	</head>
+	<body class="hold-transition skin-blue sidebar-mini">
+		<div class="wrapper">
+			<header class="main-header">
+				<a href="index2.html" class="logo">
+					<span class="logo-mini"><b>VMS</b></span>
+					<span class="logo-lg"><b>车辆管理系统</b></span>
+				</a>
+				<nav class="navbar navbar-static-top">
+					<a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+						<span class="sr-only">Toggle navigation</span>
+					</a>
+					<div class="navbar-custom-menu">
+						<ul class="nav navbar-nav">
+							<li class="dropdown user user-menu">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+									<img th:src="${session.user.avatar}" class="user-image" alt="User Image">
+									<span class="hidden-xs" th:text="${session.user.username}"></span>
+								</a>
+							</li>
+							<li>
+								<a href="user/logout">
+									<i class="fa fa-sign-out"></i> 退出
+								</a>
+							</li>
+						</ul>
+					</div>
+				</nav>
+			</header>
+			<aside class="main-sidebar">
+				<section class="sidebar">
+					<div class="user-panel">
+						<div class="pull-left image">
+							<img th:src="${session.user.avatar}" class="img-circle" alt="User Image">
+						</div>
+						<div class="pull-left info">
+							<p th:text="${session.user.username}"></p>
+							<a href="#"><i class="fa fa-circle text-success"></i> 在线</a>
+						</div>
+					</div>
+					<ul class="sidebar-menu" data-widget="tree">
+						<li class="header">MAIN NAVIGATION</li>
+						<li class="treeview" th:each="first:${menuList}">
+							<a href="#">
+								<i th:class="${first.icon}"></i>
+								<span th:text="${first.text}"></span>
+								<span class="pull-right-container">
+	                                <i class="fa fa-angle-left pull-right"></i>
+	                            </span>
+							</a>
+							<ul class="treeview-menu">
+								<li th:each="second:${first.childList}">
+									<a th:href="|javascript:openFrame('${second.url}', '${second.text}', '${first.text}', '${first.icon}')|">
+										<i th:class="${second.icon}"></i>&nbsp;
+										<span th:text="${second.text}"></span>
+									</a>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+			</aside>
+			<div class="content-wrapper">
+				<section id="contentHead" class="content-header">
+					<h1 id="frameHead"></h1>
+					<ol id="frameNav" class="breadcrumb"></ol>
+				</section>
+				<section id="frameContent" class="content"></section>
+			</div>
+			<footer class="main-footer">
+				<div class="pull-right hidden-xs">
+					<b>Version</b> 1.0.0
+				</div>
+				<strong>Copyright &copy; 2014-2019 <a href="http://www.wms.cn">AMS</a>.</strong> All rights
+				reserved.
+			</footer>
+		</div>
+
+		<!-- 模态框 -->
+		<div class="modal fade" id="myModal">
+			<div class="modal-dialog">
+				<div class="modal-content" style="width: 450px;margin: 0px auto">
+
+					<!-- 模态框头部 -->
+					<div class="modal-header">
+						<h4 id="modalTitle" class="modal-title"></h4>
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+					</div>
+
+					<!-- 模态框主体 -->
+					<div id="modalBody" class="modal-body"></div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

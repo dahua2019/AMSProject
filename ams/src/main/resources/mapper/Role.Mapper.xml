@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ekgc.ams.dao.RoleDao">
+	<select id="findListByQuery" parameterType="Role" resultMap="roleMap">
+		SELECT
+			sr.id,
+			sr.name,
+			sr.code,
+			sr.status,
+			sr.create_user,
+			sr.create_time,
+			sr.update_user,
+			sr.update_time
+		FROM
+			sys_role sr
+		<where>
+			<trim suffixOverrides="and">
+				<if test="id != null">sr.id=#{id} and </if>
+				<if test="name != null">sr.name=#{name} and </if>
+			</trim>
+		</where>
+	</select>
+
+	<update id="update" parameterType="Role">
+		update
+			sys_role
+		<set>
+			<trim suffixOverrides=",">
+				<if test="name != null">name=#{name}, </if>
+				<if test="code != null">code=#{code}, </if>
+				<if test="status != null">status=#{status}, </if>
+				<if test="createUser != null">create_user=#{createUser}, </if>
+				<if test="updateUser != null">update_user=#{updateUser}, </if>
+			</trim>
+		</set>
+		<where>
+			<trim suffixOverrides="and">
+				<if test="id != null">id=#{id} and </if>
+			</trim>
+		</where>
+	</update>
+
+
+
+	<insert id="save" parameterType="Role">
+		insert into
+			sys_role(
+				<trim suffixOverrides=",">
+					<if test="name != null">name, </if>
+					<if test="code != null">code, </if>
+					<if test="status != null">status, </if>
+					<if test="createUser != null">create_user, </if>
+					<if test="updateUser != null">update_user, </if>
+				</trim>
+			) values (
+				<trim suffixOverrides=",">
+					<if test="name != null">#{name}, </if>
+					<if test="code != null">#{code}, </if>
+					<if test="status != null">#{status}, </if>
+					<if test="createUser != null">#{createUser}, </if>
+					<if test="updateUser != null">#{updateUser}, </if>
+				</trim>
+			)
+	</insert>
+
+	<delete id="delRoleMenuByRoleId" parameterType="java.lang.Long">
+		delete from sys_role_menu  where role_id=#{roleId}
+	</delete>
+
+	<insert id="addRoleAndMenu" parameterType="java.util.Map">
+		insert into sys_role_menu(
+			role_id, menu_id
+		) values (
+			#{roleId}, #{menuId}
+		)
+	</insert>
+
+	<resultMap id="roleMap" type="Role">
+		<id property="id" javaType="java.lang.Long" column="id"/>
+		<result property="name" javaType="java.lang.String" column="name"></result>
+		<result property="code" javaType="java.lang.String" column="code"></result>
+		<result property="status" javaType="java.lang.Integer" column="status"></result>
+		<result property="createTime" javaType="java.util.Date" column="create_time"></result>
+		<result property="updateTime" javaType="java.util.Date" column="update_time"></result>
+		<association property="createUser" javaType="User">
+			<id property="id" javaType="java.lang.Long" column="create_user"/>
+		</association>
+		<association property="updateUser" javaType="User">
+			<id property="id" javaType="java.lang.Long" column="update_user"/>
+		</association>
+	</resultMap>
+</mapper>

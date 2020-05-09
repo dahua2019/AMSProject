@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<title>Title</title>
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/zTreeStyle/zTreeStyle.css">
+		<link rel="stylesheet" type="text/css" href="/css/AdminLTE.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/skins/_all-skins.min.css">
+		<script type="application/javascript" src="/js/jquery-3.4.1.min.js"></script>
+		<script type="application/javascript" src="/js/bootstrap.min.js"></script>
+		<script type="application/javascript" src="/js/jquery.ztree.all.min.js"></script>
+		<script type="application/javascript" src="/js/adminlte.min.js"></script>
+		<script type="application/javascript">
+			var setting = {
+				view: {
+					selectedMulti: false
+				},
+				check: {
+					enable: true
+				},
+				data: {
+					simpleData: {
+						enable: true
+					}
+				},
+				callback: {
+					onCheck: onCheck
+				}
+			};
+
+			var clearFlag = false;
+			function onCheck(e, treeId, treeNode) {
+				count();
+				if (clearFlag) {
+					clearCheckedOldNodes();
+				}
+			}
+			function clearCheckedOldNodes() {
+				var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
+					nodes = zTree.getChangeCheckedNodes();
+				for (var i=0, l=nodes.length; i<l; i++) {
+					nodes[i].checkedOld = nodes[i].checked;
+				}
+			}
+			function count() {
+				var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
+					checkCount = zTree.getCheckedNodes(true).length,
+					nocheckCount = zTree.getCheckedNodes(false).length,
+					changeCount = zTree.getChangeCheckedNodes().length;
+				$("#checkCount").text(checkCount);
+				$("#nocheckCount").text(nocheckCount);
+				$("#changeCount").text(changeCount);
+			}
+
+			$(document).ready(function(){
+				// 进行异步请求，获得对应的节点信息
+				$.ajax({
+					"url": "/menu/auth",
+					"type": "post",
+					"data": {
+						"roleId": $("#roleId").val()
+					},
+					"dataType": "json",
+					success: function (data) {
+						// 创建zTree
+						$.fn.zTree.init($("#treeDemo"), setting, data);
+						count();
+						clearFlag = $("#last").attr("checked");
+					}
+				});
+			});
+			
+			function auth() {
+				// 获取所选择节点
+				var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+				var nodes = zTree.getCheckedNodes(true);
+				var ids = "";
+				for (var i = 0; i < nodes.length; i++) {
+					ids = nodes[i].id + "-" + ids;
+				}
+				// 获得所有的节点之后，将最后的“-”截掉
+				ids = ids.substring(0, ids.length - 1);
+				// 将此时角色主键和菜单主键异步提交给后台，进行授权操作
+				$.ajax({
+					url: "/role/auth",
+					type: "post",
+					data: {
+						"roleId": $("#roleId").val(),
+						"ids": ids
+					},
+					dataType: "json",
+					success: function (data) {
+						if (data) {
+							alert("授权成功");
+						} else {
+							alert("授权失败");
+						}
+                        // 关闭模态框
+                        parent.closeModal();
+                        // 刷新列表
+                        parent.openFrame("/role/index", "角色管理", "系统管理", "fa fa-tachometer fa-fw");
+                    }
+				});
+			}
+		</script>
+	</head>
+	<body>
+		<div class="row">
+			<div class="col-md-12">
+				<input type="hidden" id="roleId" th:value="${roleId}"/>
+				<ul id="treeDemo" class="ztree"></ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12 text-center" style="padding-top: 10px">
+				<button type="button" class="btn btn-success" onclick="auth();">授权</button>
+			</div>
+		</div>
+	</body>
+</html>

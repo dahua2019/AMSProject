@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<link rel="stylesheet" href="/css/adminlte.min1.css">
+	<link rel="stylesheet" href="/css/all.min.css">
+	<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+	<script type="text/javascript">
+        function addRole() {
+            //获得表单信息
+            var data = $("#addForm").serialize();
+            alert(data);
+            $.ajax({
+                url: "/role/add",
+                type: "post",
+                data: data,
+                dataType:"JSON",
+                success: function (data) {
+                    if (data) {
+                        alert("添加成功");
+                    } else {
+                        alert("添加失败");
+                    }
+
+                    //关闭模态框
+                    parent.closeModal();
+                    //刷新页面
+                    parent.openFrame("/role/index", "角色管理", "系统管理", "fa fa-tachometer fa-fw")
+                }
+            })
+        }
+	</script>
+</head>
+<body>
+<form role="form" id="addForm">
+	<div class="card-body">
+		<div class="form-group">
+			<label for="name">角色名称</label>
+			<input type="text" name="name" class="form-control" id="name" placeholder="请输入用户的姓名">
+		</div>
+		<div class="form-group">
+			<label for="code">角色编码</label>
+			<input type="text" name="code" class="form-control" id="code" placeholder="请输入用户联系电话">
+		</div>
+	</div>
+	<div class="form-check">
+	</div>
+	</div>
+	<!-- /.card-body -->
+
+	<div class="card-footer text-center">
+		<button type="button" class="btn btn-primary" onclick="addRole()">保存</button>
+	</div>
+</form>
+</body>
+</html>

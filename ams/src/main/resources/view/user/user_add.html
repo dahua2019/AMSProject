@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Title</title>
+		<link rel="stylesheet" type="text/css" href="/css/all.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/adminlte.min1.css">
+		<link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+		<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+		<script type="text/javascript" src="/js/jquery.validate.min.js"></script>
+		<script type="text/javascript">
+			//加载角色列表
+			$(function () {
+				$.ajax({
+					url: "/role/list",
+					type: "post",
+					data: {
+					    "status": 1 //查询所有状态为启动状态的角色
+					},
+					success: function (data) {
+	                    //循环结果列表，通过数据组装option选项，添加到对应的select标签
+	                    var options = "";
+	                    for (var i = 0; i < data.length; i++) {
+	                        //出去此时的班级信息
+	                        var role = data[i];
+	                        options = options + "<option value='" + role.id + "'>" + role.name + "</opiton>"
+	                        //将option添加到相应的位置
+	                        $("#roleId").html(options);
+	                    }
+	                }
+				})
+	        })
+
+
+	        function addUser() {
+                var data = $("#addForm").serialize();
+                alert(data);
+                // 进行异步提交
+                $.ajax({
+                    url: "/user/add",
+                    type: "post",
+                    data: data,
+                    dataType:"JSON",
+                    success: function (data) {
+                        if (data) {
+                            alert("添加成功");
+                        } else {
+                            alert("添加失败");
+                        }
+                        //关闭模态框
+                        parent.closeModal();
+                        //刷新页面
+                        parent.openFrame("/user/index", "用户管理", "系统管理", "fa fa-tachometer fa-fw")
+                    }
+                })
+            }
+
+
+            $(function () {
+                $("#addForm").validate({
+                    // 阻止提交按钮进行同步提交，从而执行相应的js函数
+                    submitHandler:function(addForm){
+                        alert("提交事件!");
+                        // 进行异步提交
+                        addUser();
+                    },
+
+                    // 校验规则
+                    rules: {
+                        username: {
+                            // 非空校验
+                            required: true
+                        },
+                        cellphone: {
+                            // 非空校验
+                            required: true,
+                            // 数字校验，全部为数字
+                            digits: true,
+                            // 电话号码为11位
+                            minlength: 11,
+                            maxlength: 11,
+                            // 异步远程校验
+                            remote: {
+                                url: "/validation/cellphone",
+	                            type: "post"
+                            }
+                        },
+
+                        idCard:{
+                            isIdCardNo:true,
+                            remote: {
+                                url: "/validation/idCard",
+                                type: "post"
+                            }
+                        },
+                        email: {
+                            email: true,
+                            remote: {
+                                url: "/validation/email",
+	                            type: "post"
+                            },
+                        }
+                    },
+                    // 错误提示信息
+                    messages: {
+                        username: {
+                            // 非空校验
+                            required: "请填写姓名！"
+                        },
+                        cellphone: {
+                            // 非空校验
+                            required: "请填写手机号码！",
+                            // 数字校验，全部为数字
+                            digits: "请填写数字！",
+                            // 电话号码为11位
+                            minlength: "手机号码为11位！",
+                            maxlength: "手机号码为11位！",
+                            remote: "该手机号码已被注册！"
+                        },
+
+                        idCard: {
+                            idCard: "请填写正确的身份证号码！",
+                            remote: "身份证已被使用！"
+                        },
+                        email: {
+                            email: "请填写正确的邮箱地址！",
+                            remote: "该邮箱已被注册！"
+                        },
+                    },
+
+
+                });
+
+                // 自定义规则
+                $.validator.addMethod("idCard", function(value, element) {
+                    var idCardReg = /^[1-9]{17}[0-9]|X|x$/;
+                    return idCardReg.test(value);
+                }, "*请填写正确的身份证号码！");
+
+                $.validator.addMethod("email",function(value,element,params){
+                    var emailReg = /^[a-z0-9]+@([a-z0-9]+\.)+[a-z]{2,4}$/i;
+                    return this.optional(element)||(emailReg.test(value));
+                },"*请输入正确的邮箱！");
+
+                $.validator.addMethod("checkPwd",function(value,element,params){
+                    var checkPwd = /^\w{6,16}$/g;
+                    return this.optional(element)||(checkPwd.test(value));
+                },"*只允许6-16位英文字母、数字或者下画线！");
+            });
+
+			//身份证号有效验证
+            $(function () {
+                jQuery.validator.addMethod("isIdCardNo", function (value, element){
+                    return this.optional(element) || isIdCardNo(value);
+                },"请正确输入您的身份证号码");
+            });
+
+            function isIdCardNo(num) {
+                var factorArr = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5,8, 4, 2, 1];
+                var parityBit = ["1", "0", "X", "9", "8", "7", "6", "5", "4","3", "2"];
+                var varArray= [];
+                var lngProduct = 0;
+                var intCheckDigit;
+                var intStrLen = num.length;
+                var idNumber= num;
+                //initialize
+                if(intStrLen !== 18) {
+                    return false;
+                }
+                // check andset value
+                for (i = 0;i < intStrLen; i++) {
+                    varArray[i] = idNumber.charAt(i);
+                    if ((varArray[i] < '0' || varArray[i]> '9') && (i !== 17)){
+                        return false;
+                    } else if (i < 17) {
+                        varArray[i] = varArray[i] * factorArr[i];
+                    }
+                }
+
+                if(intStrLen === 18) {
+                    //check date
+                    var date8 = idNumber.substring(6, 14);
+                    if (!isDate8(date8)) {
+                        return false;
+                    }
+                    // calculate the sum of the products
+                    for (i = 0; i < 17; i++) {
+                        lngProduct = lngProduct + varArray[i];
+                    }
+                    // calculate the check digit
+                    intCheckDigit = parityBit[lngProduct % 11];
+                    // check last digit
+                    if (varArray[17] != intCheckDigit) {
+                        return false;
+                    }
+                }else{
+                    return false;
+                }
+                return true;
+            }
+
+            function isDate8(sDate) {
+                if(!/^[0-9]{8}$/.test(sDate)) {
+                    return false;
+                }
+                var year,month, day;
+                year =sDate.substring(0, 4);
+                month =sDate.substring(4, 6);
+                day =sDate.substring(6, 8);
+                var iaMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30,31];
+                if (year< 1700 || year > 2500) {
+                    return false;
+                }
+                if (((year %4 == 0) && (year % 100 != 0)) ||(year % 400 == 0)) {
+                    iaMonthDays[1] = 29;
+                }
+                if (month< 1 || month > 12) {
+                    return false;
+                }
+                return !(day < 1 || day > iaMonthDays[month - 1]);
+            }
+		</script>
+	</head>
+	<body>
+		<form role="form" id="addForm">
+			<div class="card-body">
+				<div class="form-group">
+					<label for="username">姓名</label>&nbsp;&nbsp;&nbsp;&nbsp;
+					<label class="error" for="username" style="color: red"></label>
+					<input type="text" name="username" class="form-control" id="username" placeholder="请输入用户的姓名">
+				</div>
+				<div class="form-group">
+					<label for="cellphone">联系电话</label>&nbsp;&nbsp;&nbsp;&nbsp;
+					<label class="error" for="cellphone" style="color: red"></label>
+					<input type="text" name="cellphone" class="form-control" id="cellphone" placeholder="请输入用户联系电话">
+				</div>
+				<div class="form-group">
+					<label>性别</label>&nbsp;&nbsp;&nbsp;
+					<input type="radio" name="gender"  value="1" checked> 男&nbsp;&nbsp;&nbsp;
+					<input type="radio" name="gender"  value="0"> 女
+				</div>
+				<div class="form-group">
+					<label for="roleId">职能</label>
+					<select id="roleId" name="roleId" class="form-control"></select>
+				</div>
+				<div class="form-group">
+					<label for="idCard">身份证号</label>&nbsp;&nbsp;&nbsp;&nbsp;
+					<label class="error" for="idCard" style="color: red"></label>
+					<input type="text" name="idCard" class="form-control" id="idCard" placeholder="请输入用户的性别">
+				</div>
+				<div class="form-group">
+					<label for="email">电子邮件</label>&nbsp;&nbsp;&nbsp;&nbsp;
+					<label class="error" for="email" style="color: red"></label>
+					<input type="text" name="email" class="form-control" id="email" placeholder="请输入用户的性别">
+				</div>
+			</div>
+			<div class="form-check">
+			</div>
+			</div>
+			<!-- /.card-body -->
+
+			<div class="card-footer text-center">
+				<button type="button" class="btn btn-primary" onclick="addUser()">保存</button>
+			</div>
+		</form>
+	</body>
+</html>

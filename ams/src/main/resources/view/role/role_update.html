@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<link rel="stylesheet" href="/css/adminlte.min1.css">
+	<link rel="stylesheet" href="/css/all.min.css">
+	<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+	<script type="text/javascript">
+        function updateRole() {
+            //获得表单信息
+            var data = $("#updateForm").serialize();
+            alert(data);
+            $.ajax({
+                url: "/role/update",
+                type: "post",
+                data: data,
+                dataType:"JSON",
+                success: function (data) {
+                    if (data) {
+                        alert("修改成功");
+                    } else {
+                        alert("修改失败");
+                    }
+
+                    //关闭模态框
+                    parent.closeModal();
+                    //刷新页面
+                    parent.openFrame("/role/index", "角色管理", "系统管理", "fa fa-tachometer fa-fw")
+                }
+            })
+        }
+
+        $(function () {
+            $("#updateForm").validate({
+                // 阻止提交按钮进行同步提交，从而执行相应的js函数
+                submitHandler: function (updateForm) {
+                    alert("提交事件!");
+                    // 进行异步提交
+                    updateRole();
+                },
+                // 校验规则
+                rules: {
+
+                    name: {
+                        required: true,
+                    },
+                    code: {
+                        required: true
+                    }
+                },
+                // 错误提示信息
+                messages: {
+
+                    name: {
+                        required: "角色名称不能为空！",
+                    },
+                    code: {
+                        required: "角色编码不能为空！"
+                    }
+                },
+            });
+        });
+	</script>
+</head>
+<body>
+<form role="form" id="updateForm">
+	<div class="card-body">
+		<div class="form-group">
+			<label for="name">角色名称</label>&nbsp;&nbsp;&nbsp;&nbsp;
+			<label class="error" for="name" style="color: red"></label>
+			<input type="hidden" name="id" class="form-control" id="roleId" th:value="${id}">
+			<input type="text" name="name" class="form-control" id="name" th:value="${name}">
+		</div>
+		<div class="form-group">
+			<label for="code">角色编码</label>&nbsp;&nbsp;&nbsp;&nbsp;
+			<label class="error" for="code" style="color: red"></label>
+			<input type="text" name="code" class="form-control" id="code" th:value="${code}">
+		</div>
+	</div>
+	<div class="form-check">
+	</div>
+	</div>
+	<!-- /.card-body -->
+
+	<div class="card-footer text-center">
+		<button type="button" class="btn btn-primary" onclick="updateRole()">保存</button>
+	</div>
+</form>
+</body>
+</html>

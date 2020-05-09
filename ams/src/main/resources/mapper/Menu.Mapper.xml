@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ekgc.ams.dao.MenuDao">
+	<sql id="selectSql">
+		select
+			sm.id,
+			sm.Text,
+			sm.parent_id,
+			sm.icon,
+			sm.url,
+			sm.status
+		from
+			sys_menu sm
+		left join
+			sys_menu spm on sm.parent_id=spm.id
+		join
+			sys_role_menu srm on sm.id=srm.menu_id
+	</sql>
+
+	<select id="findMenuListByMap" parameterType="java.util.Map" resultMap="menuMap">
+		select
+		sm.id,
+		sm.Text,
+		sm.parent_id,
+		sm.icon,
+		sm.url,
+		sm.status
+		from
+		sys_menu sm
+		left join
+		sys_menu spm on sm.parent_id=spm.id
+		join
+		sys_role_menu srm on sm.id=srm.menu_id
+		<where>
+			<trim suffixOverrides="and">
+				<if test="roleId != null">srm.role_id=#{roleId} and</if>
+				<choose>
+					<when test="parentId != null">sm.parent_id=#{parentId} and </when>
+					<otherwise>sm.parent_id is null and </otherwise>
+				</choose>
+				<if test="status != null">sm.status=#{status} and </if>
+			</trim>
+		</where>
+		ORDER BY sm.sort ASC
+	</select>
+
+	<select id="findListByQuery" parameterType="java.util.Map" resultMap="menuMap">
+	<include refid="selectSql"></include>
+	<where>
+		<trim suffixOverrides="and">
+			<if test="roleId != null">srm.role_id=#{roleId} and</if>
+		</trim>
+	</where>
+	</select>
+
+	<resultMap id="menuMap" type="Menu">
+		<id property="id" javaType="java.lang.Long" column="id"/>
+		<result property="text" javaType="java.lang.String" column="text"/>
+		<result property="icon" javaType="java.lang.String" column="icon"/>
+		<result property="url" javaType="java.lang.String" column="url"/>
+		<result property="status" javaType="java.lang.Integer" column="status"/>
+		<result property="createTime" javaType="java.util.Date" column="create_time"/>
+		<result property="updateTime" javaType="java.util.Date" column="update_time"/>
+		<association property="parent" javaType="Menu">
+			<id property="id" javaType="java.lang.Long" column="parent_id"/>
+		</association>
+		<association property="createUser" javaType="User">
+			<id property="id" javaType="java.lang.Long" column="create_user"/>
+		</association>
+		<association property="updateUser" javaType="User">
+			<id property="id" javaType="java.lang.Long" column="update_user"/>
+		</association>
+	</resultMap>
+</mapper>
