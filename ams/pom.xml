@@ -25,7 +25,7 @@
 		<mybatis-spring-boot-starter.version>2.1.2</mybatis-spring-boot-starter.version>
 		<druid-spring-boot-starter.version>1.1.22</druid-spring-boot-starter.version>
 		<pagehelper-spring-boot-starter.version>1.2.12</pagehelper-spring-boot-starter.version>
-		<shiro-spring.version>1.5.2</shiro-spring.version>
+		<shiro-spring.version>1.7.0</shiro-spring.version>
 		<poi.version>3.17</poi.version>
 	</properties>
 
